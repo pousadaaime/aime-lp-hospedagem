@@ -54,9 +54,13 @@ src="https://www.facebook.com/tr?id=983368201398155&ev=PageView&noscript=1"/></n
 
   /* ---------- HEADER ---------- */
   .site-header{
-    position:absolute; top:0; left:0; right:0; z-index:5; padding:22px 0;
+    position:absolute; top:0; left:0; right:0; z-index:5; padding:28px 0;
+    display:flex; justify-content:center;
   }
-  .site-header .logo{height:38px; width:auto;}
+  .site-header .logo{height:78px; width:auto;}
+  @media(max-width:600px){
+    .site-header .logo{height:60px;}
+  }
 
   /* ---------- HERO ---------- */
   .hero{
@@ -274,7 +278,7 @@ src="https://www.facebook.com/tr?id=983368201398155&ev=PageView&noscript=1"/></n
     </div>
     <div class="amenities">
       <div class="amenity-card"><img src="img/rio.jpg" alt="Rede sobre o rio particular da Pousada Aimê"><div class="label">Rio particular</div></div>
-      <div class="amenity-card"><img src="img/jacuzzi.jpg" alt="Jacuzzi ao ar livre na Pousada Aimê"><div class="label">Jacuzzi & piscina</div></div>
+      <div class="amenity-card"><img src="img/jacuzzi.jpg" alt="Casal na jacuzzi ao ar livre da Pousada Aimê"><div class="label">Jacuzzi & piscina</div></div>
       <div class="amenity-card"><img src="img/pet.jpg" alt="Hospedagem pet friendly na Aimê"><div class="label">Pet friendly</div></div>
       <div class="amenity-card"><img src="img/jogos.jpg" alt="Sinuca e sala de jogos da Pousada Aimê"><div class="label">Sala de jogos</div></div>
       <div class="amenity-card"><img src="img/restaurante.jpg" alt="Cozinha externa da Pousada Aimê em meio à mata"><div class="label">Cozinha externa</div></div>
