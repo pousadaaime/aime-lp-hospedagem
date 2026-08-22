@@ -437,6 +437,27 @@ const SHEETS_URL = "https://script.google.com/macros/s/AKfycbxoDd_yCuJcWz-Y1oG6V
 const $ = id => document.getElementById(id);
 const form = $('leadForm');
 
+/* Envia o lead pra planilha. Prioriza sendBeacon (pensado pelo próprio
+   navegador pra "disparar e não esperar", sobrevive à navegação que já
+   vem em seguida pro WhatsApp) — no navegador in-app do Instagram/Facebook
+   o fetch com redirect (Apps Script sempre redireciona) pode falhar
+   silenciosamente, e mode:'no-cors' esconde esse erro da página. Mesmo
+   corpo (texto puro em JSON) nos dois caminhos, pra não mudar o que o
+   Apps Script já espera receber. */
+function enviarLead(payload){
+  const body = JSON.stringify(payload);
+  if (navigator.sendBeacon) {
+    const blob = new Blob([body], {type:'text/plain;charset=utf-8'});
+    if (navigator.sendBeacon(SHEETS_URL, blob)) return Promise.resolve();
+  }
+  return fetch(SHEETS_URL, {
+    method:'POST',
+    mode:'no-cors',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body
+  }).catch(err => console.warn('Falha ao salvar lead:', err));
+}
+
 /* countdown de 24h, reinicia todo dia à meia-noite */
 (function(){
   function tick(){
@@ -531,29 +552,22 @@ form.addEventListener('submit', async (e) => {
 
   /* --- 2) salva o lead na mesma planilha "Leads Aimê" --- */
   if (SHEETS_URL) {
-    try {
-      await fetch(SHEETS_URL, {
-        method:'POST',
-        mode:'no-cors',
-        headers:{'Content-Type':'text/plain;charset=utf-8'},
-        body: JSON.stringify({
-          action: 'novo_lead',
-          nome: dados.nome,
-          checkin: dados.checkin,
-          checkout: dados.checkout,
-          adultos: dados.adultos,
-          criancas: dados.criancas,
-          pet: dados.pet,
-          whatsapp: dados.whatsapp,
-          telefone: dados.telefone,
-          email: '',
-          categoria: 'Hospedagem',
-          canal: 'WhatsApp',
-          origem: 'LP HOSPEDAGEM',
-          data_envio: new Date().toLocaleString('pt-BR')
-        })
-      });
-    } catch(err){ console.warn('Falha ao salvar lead:', err); }
+    await enviarLead({
+      action: 'novo_lead',
+      nome: dados.nome,
+      checkin: dados.checkin,
+      checkout: dados.checkout,
+      adultos: dados.adultos,
+      criancas: dados.criancas,
+      pet: dados.pet,
+      whatsapp: dados.whatsapp,
+      telefone: dados.telefone,
+      email: '',
+      categoria: 'Hospedagem',
+      canal: 'WhatsApp',
+      origem: 'LP HOSPEDAGEM',
+      data_envio: new Date().toLocaleString('pt-BR')
+    });
   }
 
   /* --- 3) monta a mensagem e redireciona pro WhatsApp --- */
