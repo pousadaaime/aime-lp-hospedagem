@@ -428,33 +428,31 @@ src="https://www.facebook.com/tr?id=983368201398155&ev=PageView&noscript=1"/></n
 ================================================================== */
 const WHATSAPP_NUMERO = "5511995088826";
 
-/* Mesmo endpoint do Apps Script da LP anterior — grava na mesma
-   planilha "Leads Aimê" que alimenta o painel interno. Não trocar
-   sem atualizar o painel junto. */
-const SHEETS_URL = "https://script.google.com/macros/s/AKfycbxoDd_yCuJcWz-Y1oG6VlYkoALqfiiVoxiPG53XzjA3asB5YAvFwYRb3Mn49YDNHjUs/exec";
+/* Backend de leads: Supabase (tabela "leads", RLS insert-only pra role
+   anon). Substitui o Apps Script/Google Sheets antigo (limite de linhas
+   do free tier). Chave "publishable" é segura pra expor no client —
+   só permite INSERT, nunca leitura. */
+const SUPABASE_URL = "https://vzskzainujdbvtatrglg.supabase.co/rest/v1/leads";
+const SUPABASE_KEY = "sb_publishable__khx61JCm6NsTFRZDGfF7w_nnMjH3JX";
 
 /* ------------------------------------------------------------------ */
 const $ = id => document.getElementById(id);
 const form = $('leadForm');
 
-/* Envia o lead pra planilha. Prioriza sendBeacon (pensado pelo próprio
-   navegador pra "disparar e não esperar", sobrevive à navegação que já
-   vem em seguida pro WhatsApp) — no navegador in-app do Instagram/Facebook
-   o fetch com redirect (Apps Script sempre redireciona) pode falhar
-   silenciosamente, e mode:'no-cors' esconde esse erro da página. Mesmo
-   corpo (texto puro em JSON) nos dois caminhos, pra não mudar o que o
-   Apps Script já espera receber. */
+/* Envia o lead pro Supabase. keepalive:true sobrevive à navegação que já
+   vem em seguida pro WhatsApp (mesmo papel que sendBeacon tinha antes,
+   mas sendBeacon não permite header de autenticação, por isso fetch). */
 function enviarLead(payload){
-  const body = JSON.stringify(payload);
-  if (navigator.sendBeacon) {
-    const blob = new Blob([body], {type:'text/plain;charset=utf-8'});
-    if (navigator.sendBeacon(SHEETS_URL, blob)) return Promise.resolve();
-  }
-  return fetch(SHEETS_URL, {
-    method:'POST',
-    mode:'no-cors',
-    headers:{'Content-Type':'text/plain;charset=utf-8'},
-    body
+  const { action, ...dados } = payload;
+  return fetch(SUPABASE_URL, {
+    method: 'POST',
+    keepalive: true,
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY,
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify(dados)
   }).catch(err => console.warn('Falha ao salvar lead:', err));
 }
 
@@ -550,8 +548,8 @@ form.addEventListener('submit', async (e) => {
     try { fbq('track', 'Lead'); } catch(_){}
   }
 
-  /* --- 2) salva o lead na mesma planilha "Leads Aimê" --- */
-  if (SHEETS_URL) {
+  /* --- 2) salva o lead no Supabase --- */
+  if (SUPABASE_URL) {
     await enviarLead({
       action: 'novo_lead',
       nome: dados.nome,
