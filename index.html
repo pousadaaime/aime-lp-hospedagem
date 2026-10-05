@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-<title>Pousada Aimê · A 8 min da praia de Maresias</title>
+<title>Mês do Beach Tennis em Maresias · Pousada Aimê</title>
 <meta name="description" content="Reserve 2 diárias e ganhe a 3ª como cortesia. Refúgio na mata, rio particular e jacuzzi a 8 min da praia de Maresias.">
 
 <!-- ===================================================================
@@ -112,6 +112,8 @@ src="https://www.facebook.com/tr?id=983368201398155&ev=PageView&noscript=1"/></n
   .oferta-texto h2{font-size:30px; line-height:1.25; margin-top:8px;}
   .oferta-precos{margin-top:16px; display:flex; flex-direction:column; gap:6px;}
   .oferta-precos span{font-size:14px; color:#c9bfa9;}
+  .oferta-precos .preco{font-size:18px; color:#fff;}
+  .oferta-precos .preco b{color:#e9b27f; font-family:Georgia,serif; font-size:24px;}
   .oferta-timer{
     background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18);
     border-radius:14px; padding:20px 26px; text-align:center; width:280px; max-width:100%;
@@ -238,10 +240,10 @@ src="https://www.facebook.com/tr?id=983368201398155&ev=PageView&noscript=1"/></n
   <img src="img/hero.jpg" alt="Pousada Aimê em Maresias, vista externa entre a mata">
   <div class="hero-content">
     <div class="wrap">
-      <span class="eyebrow">🌿 a 8 minutos da praia</span>
-      <h1>Maresias começa na areia. Na Aimê, ela continua na mata.</h1>
-      <p>Rio particular, jacuzzi e o silêncio que só a mata dá. Pra você viver Maresias inteira, não só a faixa de areia. Pet friendly, para casais, famílias e grupos de até 60 pessoas.</p>
-      <a href="#reservar" class="hero-cta">Consultar datas e valores</a>
+      <span class="eyebrow">🎾 mês do beach tennis · outubro</span>
+      <h1>Torneio na areia, descanso na mata.</h1>
+      <p>A 8 minutos da praia, a Aimê é o pouso de quem passa o dia na quadra: rio particular, jacuzzi, fogueira e o silêncio que só a mata dá. Pet friendly, para duplas, times, famílias e grupos de até 60 pessoas.</p>
+      <a href="#reservar" class="hero-cta">Consultar datas</a>
     </div>
   </div>
 </div>
@@ -250,19 +252,20 @@ src="https://www.facebook.com/tr?id=983368201398155&ev=PageView&noscript=1"/></n
 <div class="oferta">
   <div class="wrap oferta-wrap">
     <div class="oferta-texto">
-      <p class="oferta-sub">Reserve agora e ganhe um dia a mais pra desacelerar de verdade.</p>
-      <h2>Reserve 2 diárias e ganhe a 3ª como cortesia</h2>
+      <p class="oferta-sub">Oferta do Mês do Beach Tennis · válida em outubro todo</p>
+      <h2>Diária a partir de R$ 200 pra 2 pessoas</h2>
       <div class="oferta-precos">
-        <span>Fim de semana · R$ 693 o casal</span>
-        <span>Meio de semana, seg a qui · a partir de R$ 455 o casal</span>
+        <span class="preco">2 pessoas · <b>R$ 200</b> a diária</span>
+        <span class="preco">4 pessoas · <b>R$ 390</b> a diária</span>
+        <span>Mínimo de 2 diárias · sujeito à disponibilidade</span>
       </div>
     </div>
     <div class="oferta-timer">
-      <div class="timer-label">restam só estas últimas horas</div>
+      <div class="timer-label">a oferta vale até 31/10</div>
       <div class="timer-boxes" id="countdown">
+        <div class="tbox"><span id="cd-d">--</span><small>dias</small></div>
         <div class="tbox"><span id="cd-h">--</span><small>hrs</small></div>
         <div class="tbox"><span id="cd-m">--</span><small>min</small></div>
-        <div class="tbox"><span id="cd-s">--</span><small>seg</small></div>
       </div>
     </div>
   </div>
@@ -456,23 +459,23 @@ function enviarLead(payload){
   }).catch(err => console.warn('Falha ao salvar lead:', err));
 }
 
-/* countdown de 24h, reinicia todo dia à meia-noite */
+/* contagem regressiva real: a oferta vale até o fim de 31/10/2026 */
 (function(){
+  const fim = new Date(2026, 10, 1, 0, 0, 0);
   function tick(){
-    const agora = new Date();
-    const fim = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate()+1, 0, 0, 0);
-    const diff = fim - agora;
-    const h = Math.floor(diff/3600000);
+    const diff = Math.max(0, fim - new Date());
+    const d = Math.floor(diff/86400000);
+    const h = Math.floor(diff%86400000/3600000);
     const m = Math.floor(diff%3600000/60000);
-    const s = Math.floor(diff%60000/1000);
+    $('cd-d').textContent = String(d).padStart(2,'0');
     $('cd-h').textContent = String(h).padStart(2,'0');
     $('cd-m').textContent = String(m).padStart(2,'0');
-    $('cd-s').textContent = String(s).padStart(2,'0');
   }
   tick();
-  setInterval(tick, 1000);
+  setInterval(tick, 30000);
 })();
 
+const CAMPANHA = new URLSearchParams(location.search).get('utm_campaign') || '';
 const hoje = new Date().toISOString().split('T')[0];
 $('checkin').min = hoje;
 $('checkout').min = hoje;
@@ -563,14 +566,14 @@ form.addEventListener('submit', async (e) => {
       email: '',
       categoria: 'Hospedagem',
       canal: 'WhatsApp',
-      origem: 'LP HOSPEDAGEM',
+      origem: 'LP HOSPEDAGEM' + (CAMPANHA ? ' · ' + CAMPANHA : ''),
       data_envio: new Date().toLocaleString('pt-BR')
     });
   }
 
   /* --- 3) monta a mensagem e redireciona pro WhatsApp --- */
   const msg =
-`Olá! Acabei de consultar uma hospedagem na Aimê.
+`Olá! Vi o Mês do Beach Tennis e acabei de consultar uma hospedagem na Aimê.
 Nome: ${dados.nome}
 Entrada: ${dados.checkin}
 Saída: ${dados.checkout}
